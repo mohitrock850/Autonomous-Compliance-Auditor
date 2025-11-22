@@ -1,0 +1,27 @@
+Build the Agent Pipeline (Agent-by-Agent)
+This is the core development. We will build each of your 5 agents.
+
+Ingestion Agent
+Role: Manages the start of the workflow.
+Action: It calls the FileReaderTool to get text chunks.
+ADK Concept: It uses Sessions & State Management to create a new session and store the text chunks in the session_state. This state will be passed to the next agent.
+
+Classification Agent
+Role: Categorizes the document.
+Action: It takes the text chunks from the session_state, sends a sample to Gemini, and asks for a classification (e.g., "Contract," "Policy").
+ADK Concept: Uses a Built-in Tool (Gemini). It updates the session_state with the new metadata (e.g., session_state['doc_type'] = 'Contract').
+
+Compliance Analysis Agent
+Role: Finds all compliance risks.
+Action: This is our most complex agent. It will iterate through each text chunk. For each chunk, it calls Gemini with a specific prompt (e.g., "Analyze this text for compliance risks...").
+ADK Concept: We'll implement this using a Sequential Agent or Loop Agent to process chunks one by one. It stores all findings in a list in session_state.
+
+Evidence & Verification Agent
+Role: Backs up each risk with proof.
+Action: This agent takes the list of risks from session_state. For each risk, it finds the exact supporting text (evidence) from the original chunks.
+ADK Concept: We will implement this using Parallel Agents. The ADK can spin up multiple "sub-agents" to find evidence for all risks simultaneously, which is much faster.
+
+Reporting Agent
+Role: Creates the final deliverable.
+Action: This agent reads the final, enriched data from session_state (classification, risks, evidence). It calls Gemini one last time to "Write an executive summary" and then formats all the data into a clean Markdown file.
+ADK Concept: This is the final step in our multi-agent sequence.
