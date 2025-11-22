@@ -109,25 +109,46 @@ graph LR
 
 ## 📂 Repository Structure
 
+## 📂 Repository Structure
+
 ```text
 Autonomous-Compliance-Auditor/
-├── agents/                 # The 5 AI Agents
-│   ├── ingestion_agent.py
-│   ├── classification_agent.py
-│   ├── analysis_agent.py   # Contains the Hybrid RAG logic
-│   ├── evidence_agent.py   # Contains HITL logic
-│   └── reporting_agent.py
-├── tools/                  # MCP & Custom Tools
-│   ├── rag_tool.py         # FAISS + BM25 Implementation
-│   ├── vision_tool.py      # Gemini Vision OCR
-│   └── google_drive_tool.py
-├── knowledge_base/         # Source Policy Documents
-├── screenshots/            # Images for README
-├── main.py                 # Orchestration Logic
-├── app.py                  # Streamlit Frontend
-├── run_indexing.py         # Vector DB Builder
-├── Dockerfile              # Containerization
-└── requirements.txt        # Dependencies
+├── agents/                     # The 5 Specialized AI Agents
+│   ├── ingestion_agent.py      # Scans Drive/URLs & batches jobs
+│   ├── classification_agent.py # Identifies doc type (Contract vs Policy)
+│   ├── analysis_agent.py       # Core logic: Hybrid RAG & Risk Detection
+│   ├── evidence_agent.py       # QA Auditor: Verifies findings & triggers HITL
+│   └── reporting_agent.py      # Generates Markdown report & sends Email
+│
+├── tools/                      # Custom Tools & MCPs
+│   ├── google_drive_tool.py    # Google Drive API integration
+│   ├── file_reader_tool.py     # text/pdf/docx parser
+│   ├── web_scraper_tool.py     # URL content extractor
+│   ├── rag_tool.py             # Hybrid Search (FAISS + BM25 + Re-Ranker)
+│   ├── vision_tool.py          # Gemini Vision (OCR) for images
+│   └── notification_tool.py    # Gmail API integration
+│
+├── knowledge_base/             # Source Policy Documents (PDFs/TXTs)
+│
+├── screenshots/                # Project Demo Images
+│   ├── dashboard-main.png
+│   ├── hitl-warning.png
+│   └── ...
+│
+├── tests/                      # Unit & Integration Tests
+│   ├── test_agent1.py
+│   ├── ...
+│   └── test_vision.py
+│
+├── app.py                      # Streamlit Frontend Dashboard
+├── main.py                     # CLI Orchestration Script
+├── run_indexing.py             # Vector DB Builder Script
+├── create_sample_image.py      # Helper to generate test images
+├── models.py                   # Gemini Model Configuration (Retry Logic)
+├── chunk_metadata.json         # RAG Metadata
+├── knowledge.index             # FAISS Vector Index
+├── requirements.txt            # Python Dependencies
+└── .gitignore
 ```
 
 ## Workflow Gallery 
