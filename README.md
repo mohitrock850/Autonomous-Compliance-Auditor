@@ -109,8 +109,6 @@ graph LR
 
 ## 📂 Repository Structure
 
-## 📂 Repository Structure
-
 ```text
 Autonomous-Compliance-Auditor/
 ├── agents/                     # The 5 Specialized AI Agents
