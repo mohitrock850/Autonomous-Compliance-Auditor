@@ -1,159 +1,195 @@
 # 🛡️ Autonomous Compliance Auditor
 
-<p align="center">
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white">
-  <img alt="Google ADK" src="https://img.shields.io/badge/Google%20ADK-Agent%20Orchestration-orange?logo=google">
-  <img alt="Gemini" src="https://img.shields.io/badge/AI-Gemini%202.5%20Flash-8E75B2?logo=google-gemini&logoColor=white">
-  <img alt="Streamlit" src="https://img.shields.io/badge/Frontend-Streamlit-FF4B4B?logo=streamlit&logoColor=white">
-  <img alt="Docker" src="https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker&logoColor=white">
-</p>
+<div align="center">
+
+[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Google ADK](https://img.shields.io/badge/Google%20ADK-Orchestration-orange?logo=google)](https://github.com/google/adk-python)
+[![Gemini](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-8E75B2?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![Streamlit](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+
+**An enterprise-grade multi-agent system that autonomously audits documents, detects risks via Hybrid RAG, and enforces Human-in-the-Loop safety.**
+
+</div>
 
 ---
 
-<p align="center">
-  <b>An enterprise-grade multi-agent system that autonomously audits documents, detects risks, and generates compliance reports using Hybrid RAG and Computer Vision.</b>
-</p>
+## 📸 Live Dashboard
+![Main Dashboard](./screenshots/dashboard.png)
 
 ---
 
-## 📖 Overview
+## ⚡ Key Features
 
-The **Autonomous Compliance Auditor** transforms the slow, manual, and error-prone process of legal document review into a high-speed, AI-driven pipeline.
-
-Designed for the **Enterprise Agents** track, this system uses a team of **5 specialized AI Agents** to autonomously monitor cloud storage, read complex documents (including scanned images via OCR), identify non-compliance risks using **Hybrid RAG**, and generate audit-ready reports.
-
-Critically, it features a **Human-in-the-Loop (HITL)** guardrail for high-severity risks, ensuring enterprise safety and accountability.
-
-### 🖥️ The Dashboard
-The system provides a real-time **Compliance Dashboard** to visualize the audit process and handle approvals.
-
-![Full Dashboard](./screenshots/dashboard-full.png)
+| Feature | Tech | Description |
+| :--- | :--- | :--- |
+| 🧠 **Hybrid Brain** | **FAISS + BM25** | Combines vector & keyword search with **Cross-Encoder Re-Ranking** for precise policy retrieval. |
+| 👁️ **Agentic Vision** | **Gemini Vision** | Transcribes scanned contracts, charts, and images that standard parsers miss. |
+| 🛑 **Safety Guardrail** | **HITL** | **Stops execution** on high-severity risks until a human admin approves via UI. |
+| 🔄 **Self-Healing** | **Reflection Loop** | If a finding is rejected, the agent automatically re-analyzes the document. |
+| 🕵️ **Orchestration** | **Google ADK** | Coordinates 5 agents: *Ingestion, Classification, Analysis, Evidence, Reporting*. |
 
 ---
 
-## 🚀 Key Features & Innovation
+## 🔄 Architecture Flow
 
-| Feature | Description |
-|----------|--------------|
-| 🧠 **Hybrid RAG Brain** | Combines **Vector Search** (FAISS) for concepts, **Keyword Search** (BM25) for exact terms, and **Cross-Encoder Re-Ranking** to find precise policy clauses with extreme accuracy. |
-| 🔄 **Self-Reflection Loop** | If the QA Agent rejects a finding (false positive), the system triggers a **self-correction cycle**, asking the Analyst Agent to re-evaluate the document automatically. |
-| 👁️ **Agentic Vision (OCR)** | Uses **Gemini 2.5 Flash Vision** to "see" and transcribe scanned contracts, charts, and screenshots that traditional text parsers miss. |
-| 🛑 **Human-in-the-Loop** | **Enterprise Safety:** High-severity risks trigger a blocking state, pausing the pipeline and requiring human approval via the UI before the report is finalized. |
-| 🕵️ **Multi-Agent Pipeline** | A choreographed workflow of 5 agents: *Ingestion, Classification, Analysis, Evidence, Reporting*. |
+The system uses a **Loop-and-Gate** pattern to ensure accuracy and safety.
 
----
+```mermaid
+graph TD
+    Start[🚀 Start Audit] --> Ingest[🕵️ Ingestion Agent]
+    Ingest --> Classify[🧐 Classification Agent]
+    
+    subgraph "Perception Layer"
+    Classify -- Image --> Vision[👁️ Vision Tool]
+    Classify -- Text --> File[📄 File Reader]
+    end
 
-## 🧠 System Architecture
+    Vision --> Analyze[⚖️ Analysis Agent]
+    File --> Analyze
+    
+    subgraph "Cognitive Loop"
+    Analyze <-->|Hybrid RAG Query| DB[(Policy DB)]
+    Analyze --> Evidence[🕵️‍♂️ Evidence Agent]
+    Evidence -- Reject --> Analyze
+    end
+    
+    Evidence -- Verify --> Gate{Severity?}
+    Gate -- High --> HITL[🛑 Human Approval]
+    Gate -- Low --> Report[📝 Reporting Agent]
+    HITL --> Report
+    
+    Report --> Email[📧 Email User]
+    Report --> UI[🖥️ Update Dashboard]
 
-The system is built on the **Google Agent Development Kit (ADK)** using a "Loop-and-Gate" pattern.
+    style HITL fill:#b71c1c,stroke:#fff,color:#fff
+    style Analyze fill:#0d47a1,stroke:#fff,color:#fff
+```
+## Workflow Gallery 
 
-
-
-1.  **User** starts Audit via Streamlit UI.
-2.  **Ingestion Agent** scans Google Drive/URLs and queues files.
-3.  **Classification Agent** identifies document type.
-    * If Image/Scanned PDF -> Uses **Vision Tool**.
-    * If Text Doc -> Uses **File Reader**.
-4.  **Analysis Agent** chunks text and queries **Hybrid RAG DB** for policies.
-5.  **Evidence Agent** verifies risks.
-    * If Invalid -> Triggers **Self-Reflection Loop** back to Analysis.
-    * If Valid & High Severity -> Triggers **HITL Pause**.
-6.  **Human Admin** approves or rejects via Dashboard.
-7.  **Reporting Agent** emails final report to user.
-
----
-
-## 📸 Application Walkthrough
-
-### 1. Risk Detection & HITL Guardrail
-When a "High Severity" risk is detected (e.g., insecure data handling), the system automatically **pauses** and demands human review.
-
-![HITL Warning](./screenshots/hitl-warning.png)
-
-### 2. Comprehensive Reporting
-The system generates a detailed Markdown report, categorizing risks by severity (High/Medium/Low) with clear evidence and recommendations.
-
-![Report Summary](./screenshots/report-summary.png)
-![Report Findings](./screenshots/report-findings.png)
-![Report Details](./screenshots/report-details.png)
-
-### 3. Automated Delivery
-Once approved, the final report is automatically emailed to the stakeholders.
-
-![Email Proof](./screenshots/email-proof.png)
-
----
+<div align="center">
+  <h3>Screenshots</h3>
+  <table border="0" cellspacing="10" cellpadding="10">
+    <tr>
+      <td align="center">
+        <strong>Risk Detected</strong><br><br>
+        <img src="./screenshots/report-findings.png" alt="Full Q&A conversation" width="400">
+      </td>
+      <td align="center">
+        <strong>HITL Guardrail</strong><br><br>
+        <img src="./screenshots/hitl-warning.png" alt="Initial application screen with configuration sidebar" width="400">
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <strong>Final Report</strong><br><br>
+        <img src="./screenshots/report-summary.png" alt="Showing retrieved evidence from the vector search" width="400">
+      </td>
+      <td align="center">
+        <strong>Delivery</strong><br><br>
+        <img src="./screenshots/email-proof.png" alt="Showing retrieved evidence from the knowledge graph" width="400">
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## 🛠️ Tech Stack
 
-* **Orchestration:** Google ADK (Agent Development Kit)
-* **LLM:** Gemini 2.5 Flash (Reasoning, Vision, Classification)
-* **Frontend:** Streamlit (Interactive Dashboard)
-* **Vector DB:** FAISS (Semantic Search)
-* **Re-Ranking:** Cross-Encoder (`ms-marco-MiniLM-L-6-v2`)
-* **Tools:** Google Drive API, Gmail API
-* **OCR:** Pillow & Gemini Vision
+This project is built with a robust, enterprise-grade stack of tools and libraries:
 
----
+<p align="center">
+  <a href="https://www.python.org" target="_blank">
+    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  </a>
+  <a href="https://github.com/google/adk-python" target="_blank">
+    <img src="https://img.shields.io/badge/Google%20ADK-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google ADK">
+  </a>
+  <a href="https://streamlit.io" target="_blank">
+    <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit">
+  </a>
+  <a href="https://ai.google.dev/" target="_blank">
+    <img src="https://img.shields.io/badge/Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white" alt="Gemini">
+  </a>
+  <a href="https://www.docker.com/" target="_blank">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  </a>
+  <a href="https://github.com/facebookresearch/faiss" target="_blank">
+    <img src="https://img.shields.io/badge/FAISS-0081CB?style=for-the-badge&logo=meta&logoColor=white" alt="FAISS">
+  </a>
+  <a href="https://huggingface.co/" target="_blank">
+    <img src="https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="HuggingFace">
+  </a>
+</p>
 
-## 🏃‍♂️ Getting Started
+## Getting Started
 
-### 1️⃣ Prerequisites
-* Python 3.10+
-* A Google Cloud Project with **Drive API** and **Gmail API** enabled.
-* A Google AI Studio API Key.
+Follow these steps to set up and run the Autonomous Compliance Auditor locally.
 
-### 2️⃣ Installation
+### Prerequisites
 
-Clone the repository and install dependencies:
+-   Python 3.10+
+-   Git
+-   Google Cloud Project (with Drive & Gmail APIs enabled)
+-   Google AI Studio API Key
 
-```bash
-git clone [https://github.com/yourusername/autonomous-compliance-auditor.git](https://github.com/yourusername/autonomous-compliance-auditor.git)
-cd autonomous-compliance-auditor
+### Installation
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/yourusername/autonomous-compliance-auditor.git](https://github.com/yourusername/autonomous-compliance-auditor.git)
+    cd autonomous-compliance-auditor
+    ```
 
-# Install libraries
-pip install -r requirements.txt
-3️⃣ Configuration
-Environment Variables: Create a .env file in the root directory:
+2.  **Create and activate a virtual environment:**
+    ```bash
+    # Create the environment
+    python -m venv venv
 
-Ini, TOML
+    # Activate on Windows
+    .\venv\Scripts\activate
+    
+    # Activate on macOS/Linux
+    source venv/bin/activate
+    ```
 
-GEMINI_API_KEY="your_google_ai_studio_key"
-Google Credentials: Place your credentials.json (OAuth 2.0 Client ID) in the root folder.
+3.  **Install the required packages:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-Build Knowledge Base:
+4.  **Set up Configuration:**
+    * Create a `.env` file in the root directory:
+        ```ini
+        GEMINI_API_KEY="your_google_ai_studio_key"
+        ```
+    * Place your `credentials.json` (Google OAuth Client ID) in the root folder.
 
-Put your PDF/TXT policy documents in the knowledge_base/ folder.
+## Usage
 
-Run the indexer to build the RAG brain:
+1.  **Build the Knowledge Base:**
+    Run the indexer to vectorize your policy documents (PDF/TXT in `knowledge_base/`):
+    ```bash
+    python run_indexing.py
+    ```
 
-Bash
+2.  **Launch the Dashboard:**
+    Start the Streamlit application:
+    ```bash
+    streamlit run app.py
+    ```
 
-python run_indexing.py
-🖥️ Usage
-Option A: Run with Docker (Recommended)
-We have containerized the application for easy deployment.
+3.  **Access the App:**
+    Open your web browser to the local URL provided (usually `http://localhost:8501`).
 
-Bash
+4.  **Run an Audit:**
+    * Enter a **Google Drive Folder ID** or **Web URL** in the sidebar.
+    * Click **"🚀 Start Audit Pipeline"**.
+    * Watch the agents ingest, classify, and analyze files in real-time.
+    * **Approve/Reject** high-severity risks when the Human-in-the-Loop guardrail activates.
 
-# Build the image
-docker build -t compliance-ai .
+## Documents Tested
 
-# Run the container (Mounting secrets)
-docker run -p 8501:8501 \
-  --env-file .env \
-  -v ${PWD}/credentials.json:/app/credentials.json \
-  -v ${PWD}/token.json:/app/token.json \
-  compliance-ai
-Access the dashboard at http://localhost:8501.
-
-Option B: Run Locally
-Bash
-
-streamlit run app.py
-🏆 Competition Track: Enterprise Agents
-This project addresses a critical enterprise need—Compliance Automation. It moves beyond simple chat interactions to perform complex, long-running background work that integrates with existing business tools (Drive/Email) while maintaining strict human oversight for high-risk decisions.
+This system has been successfully tested on complex enterprise documents, including:
+-   `Internal_Data_Policy.docx` (Text-based policies)
+-   `Scanned_Vendor_Contract.png` (Image-based contracts requiring OCR)
+-   `Google_Privacy_Policy.html` (Live web URLs)
