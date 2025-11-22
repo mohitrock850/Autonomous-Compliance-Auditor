@@ -19,6 +19,24 @@
 
 ---
 
+## 📑 Table of Contents
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Architecture](#-architecture-flow)
+- [Technical Deep Dive](#-technical-deep-dive-the-hybrid-brain)
+- [Repository Structure](#-repository-structure)
+- [Getting Started](#-getting-started)
+- [License](#-license)
+
+---
+
+## 📖 Overview
+The **Autonomous Compliance Auditor** transforms the slow, manual process of legal document review into a high-speed, AI-driven pipeline. Instead of relying on simple keyword matching, it employs a **Hybrid RAG** approach (Vector + Keyword + Re-ranking) to understand complex legal nuance.
+
+Critically, it features a **Human-in-the-Loop (HITL)** guardrail: high-severity risks trigger a system freeze, requiring explicit human approval before the report is finalized.
+
+---
+
 ## ⚡ Key Features
 
 | Feature | Tech | Description |
@@ -65,6 +83,53 @@ graph TD
     style HITL fill:#b71c1c,stroke:#fff,color:#fff
     style Analyze fill:#0d47a1,stroke:#fff,color:#fff
 ```
+## 🔬 Technical Deep Dive: The "Hybrid Brain"
+
+**The Problem:** Legal analysis requires *both* exact references (e.g., "Section 4.2") and semantic understanding (e.g., "Breach" = "Incident"). Standard RAG fails at this duality.
+
+**The Solution:** A 3-Stage Pipeline for maximum precision.
+
+```mermaid
+graph LR
+    Q[User Query] --> A[🔍 BM25 Keywords]
+    Q --> B[📐 FAISS Vectors]
+    A & B --> C{🌪️ Fusion Pool}
+    C --> D[⚖️ Cross-Encoder]
+    D --> E[🎯 Top Evidence]
+    
+    style D fill:#ffeba3,stroke:#fbc02d,stroke-width:2px
+```
+| Stage	| Action | Technology| 
+| :--- | :--- | :--- |
+| 1. Retrieval	| Parallel fetch of Concepts (Vectors) and Exact Terms (Keywords).| FAISS + Rank_BM25| 
+| 2. Fusion | 	Combine diverse results into a unified candidate pool.	| Ensemble Retrieval| 
+| 3. Re-Ranking| 	A dedicated model scores every candidate pair to pick the single best match.| 	Cross-Encoder (ms-marco)| 
+
+---
+
+## 📂 Repository Structure
+
+```text
+Autonomous-Compliance-Auditor/
+├── agents/                 # The 5 AI Agents
+│   ├── ingestion_agent.py
+│   ├── classification_agent.py
+│   ├── analysis_agent.py   # Contains the Hybrid RAG logic
+│   ├── evidence_agent.py   # Contains HITL logic
+│   └── reporting_agent.py
+├── tools/                  # MCP & Custom Tools
+│   ├── rag_tool.py         # FAISS + BM25 Implementation
+│   ├── vision_tool.py      # Gemini Vision OCR
+│   └── google_drive_tool.py
+├── knowledge_base/         # Source Policy Documents
+├── screenshots/            # Images for README
+├── main.py                 # Orchestration Logic
+├── app.py                  # Streamlit Frontend
+├── run_indexing.py         # Vector DB Builder
+├── Dockerfile              # Containerization
+└── requirements.txt        # Dependencies
+```
+
 ## Workflow Gallery 
 
 <div align="center">
@@ -121,18 +186,14 @@ This project is built with a robust, enterprise-grade stack of tools and librari
   </a>
 </p>
 
-## Getting Started
+## 🚀 Getting Started
 
-Follow these steps to set up and run the Autonomous Compliance Auditor locally.
+### 1️⃣ Prerequisites
+* **Python 3.10+**
+* **Google Cloud Project** with **Drive API** and **Gmail API** enabled.
+* **Google AI Studio API Key** (for Gemini 2.5 Flash).
 
-### Prerequisites
-
--   Python 3.10+
--   Git
--   Google Cloud Project (with Drive & Gmail APIs enabled)
--   Google AI Studio API Key
-
-### Installation
+### 2️⃣ Installation
 
 1.  **Clone the repository:**
     ```bash
@@ -193,3 +254,7 @@ This system has been successfully tested on complex enterprise documents, includ
 -   `Internal_Data_Policy.docx` (Text-based policies)
 -   `Scanned_Vendor_Contract.png` (Image-based contracts requiring OCR)
 -   `Google_Privacy_Policy.html` (Live web URLs)
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
